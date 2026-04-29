@@ -51,6 +51,10 @@
 
 ## 💡 Ideas (not yet prioritized)
 
+- **Gold trading positioning** — 90% of fxnx trading volume is XAUUSD. Consider leading with "the gold trading platform" angle in messaging, especially for MENA markets where gold has strong cultural resonance. This is a sharper position than "AI-driven forex broker."
+
+- **Counter Mondshield with NX Boost** — MondFX's Mondshield (loss coverage up to 60%, $2K min) is gaining traction with risk-averse beginners in MENA. fxnx already has NX Boost Shield mode (50% loss coverage) but doesn't lead with it. Review whether NX Boost messaging should be sharpened to compete directly. See `competitor-profiles/mondfx.md` for Mondshield details.
+
 - Morocco: 100% retention + $2,058 avg FTD with only 2 depositors — could be a high-value untapped market
 - Vietnam: 98.1% retention — worth a dedicated retention/upsell campaign
 - Sweden: 1 depositor, 121.7 avg lots/FTD — outlier worth investigating

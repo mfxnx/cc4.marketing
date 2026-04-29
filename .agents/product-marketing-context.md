@@ -75,6 +75,22 @@
 
 **Languages served:** English, Persian (Farsi), Arabic, French, Spanish — with RTL support for FA/AR
 
+**What they actually trade:**
+Gold (XAUUSD) dominates — ~90% of total trading volume. 273 of 448 active traders trade gold. This makes fxnx a de-facto gold trading platform, not a traditional forex broker. EURUSD is a distant second. Full breakdown:
+
+| # | Instrument | Volume (lots) | Accounts |
+|---|-----------|--------------|----------|
+| 1 | XAUUSD (Gold) | 7,948 | 273 |
+| 2 | XAUUSD.fix | 210 | 54 |
+| 3 | EURUSD | 85 | 110 |
+| 4 | US100 (Nasdaq) | 76 | 18 |
+| 5 | USDJPY | 73 | 72 |
+| 6 | US30 (Dow Jones) | 58 | 28 |
+| 7 | GBPJPY | 50 | 15 |
+| 8 | GBPUSD | 47 | 85 |
+| 9 | XAUEUR | 47 | 8 |
+| 10 | DE30 | 38 | 6 |
+
 ---
 
 ## Personas
@@ -215,19 +231,21 @@ Instead of competing only on spreads (a race to the bottom), fxnx adds a full in
 
 **What we have:**
 - 16,453 registered users across 40 countries — 9 months since launch
+- 487 total depositors · 201 repeat depositors (41.3%)
+- $801,616 total deposit volume
+- 448 active traders in last 6 months
+- 66,062 total trades executed (last 6 months)
+- 8,848 lots traded (last 6 months)
+- 147 avg trades per active account
 - 150+ tradable instruments
 - Sub-100ms execution
 - 5 languages supported (EN/AR/FA/ES/RU)
-- $100 minimum deposit
-- 1:500 leverage
+- $100 minimum deposit · 1:500 leverage
 - NX Miles: up to 89% commission savings at Elite tier
 
-**What we need:**
-- Total trading volume (lots or USD)
-- Total trades executed
-- Uptime %
-- Average execution speed (confirmed from MT5 logs)
-- Client testimonials
+**What we still need:**
+- Uptime % (from dev)
+- Client testimonials (from account managers)
 
 ---
 
@@ -240,13 +258,16 @@ Instead of competing only on spreads (a race to the bottom), fxnx adds a full in
 **Key conversion action:** First deposit (minimum $100 into NX One account)
 
 **Current metrics:**
-- Total users: 16,453
-- Experienced users: 1,604
-- Experienced depositors: 191
+- Total registered users: 16,453
+- Total depositors: 487
+- Repeat depositors: 201 (41.3%)
+- Total deposit volume: $801,616
+- Active traders (last 6 months): 448
+- Experienced users: 1,604 · Experienced depositors: 191
 - Top market by deposits: Iran ($175,022)
-- Highest conversion rate market: Romania (57.1%)
-- Highest avg FTD market: Sweden ($3,500) / Morocco ($2,058)
-- Total depositors: [TBD]
+- Highest conversion rate: Romania (57.1%)
+- Highest avg FTD: Sweden ($3,500) / Morocco ($2,058)
+- #1 traded instrument: Gold (XAUUSD) — 90% of volume
 
 ---
 
