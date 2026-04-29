@@ -25,6 +25,65 @@ If the user provides URLs and context is available, proceed without asking.
 
 ---
 
+## Forex Broker Context (fxnx-specific overlay)
+
+This skill has been customized for forex broker competitive research. When profiling forex/CFD broker competitors, extend every profile with these additional dimensions:
+
+### Forex-Specific Research Dimensions
+
+| Dimension | What to Extract |
+|-----------|----------------|
+| **Regulation** | Regulator name, license number, jurisdiction (e.g., FCA, CySEC, MISA, ASIC). Offshore vs. tier-1 regulated. |
+| **Trading conditions** | Min spread (forex pairs + gold), commission structure, swap/overnight fees, margin call and stop-out levels |
+| **Leverage** | Max leverage offered (forex, gold, indices, crypto) |
+| **Account types** | How many account types, what differentiates them, min deposit per type |
+| **Instruments** | Total count, FX pairs, metals (especially gold — XAUUSD), indices, crypto CFDs, commodities, stocks |
+| **Platform** | MT4 / MT5 / proprietary / web trader / mobile app. Any AI tools or smart features? |
+| **Deposit & withdrawal** | Min deposit, accepted payment methods (cards, crypto, wire, e-wallets), withdrawal speed claims |
+| **Bonus & promotions** | Welcome bonus, deposit bonus %, trading competitions, loyalty program |
+| **Copy/social trading** | PAMM, copy trading, social trading — available or not, how it works |
+| **Education** | Webinars, courses, market analysis — depth and quality |
+| **Target regions** | Which languages on site, which countries explicitly targeted, MENA/LatAm/Asia focus signals |
+| **Islamic account** | Swap-free / Islamic account available or not |
+| **AI / tech features** | Any AI-powered tools, signals, or automation features |
+
+### Forex Profile Template Extension
+
+Add this section to every competitor profile after **## Product & Features**:
+
+```markdown
+## Trading Conditions
+
+| Condition | Value |
+|-----------|-------|
+| Regulation | [regulator + license] |
+| Min deposit | [$amount] |
+| Spreads from | [X pips on EUR/USD] |
+| Commission | [$X/lot or included in spread] |
+| Max leverage | [1:X] |
+| Platforms | [MT4 / MT5 / proprietary] |
+| Instruments | [total count] |
+| Gold (XAUUSD) | [available? spread?] |
+| Islamic account | [yes/no] |
+| Withdrawal speed | [claimed or observed] |
+| Payment methods | [list] |
+
+## Bonus & Promotions
+[What bonuses or promotions do they run? Deposit bonuses, competitions, loyalty programs?]
+
+## Regional Focus
+[Which regions/languages do they target? Any MENA, Persian, Arabic, LatAm signals?]
+```
+
+### What Good Looks Like for Forex Profiles
+- **Regulation is the trust anchor** — tier-1 regulated (FCA, ASIC, CySEC) vs. offshore (MISA, FSA Seychelles, VFSC) is a major positioning dimension
+- **Spreads + commission** together = total trading cost — always calculate the all-in cost per lot for comparison
+- **Gold coverage matters** — fxnx's traders trade 90% gold (XAUUSD), so how competitors handle gold pricing is critical
+- **MENA signals** — Arabic language, Islamic accounts, local payment methods (e.g. crypto deposits, local bank transfer) indicate MENA targeting
+- **Always compare against fxnx** — read `.agents/product-marketing-context.md` first, then frame every finding relative to fxnx's position
+
+---
+
 ## Core Principles
 
 ### 1. Facts Over Opinions
@@ -38,6 +97,22 @@ Profiles are snapshots. Always include the date generated. Flag anything that lo
 
 ### 4. Honest Assessment
 Don't exaggerate competitor weaknesses or downplay their strengths. Accurate profiles are useful profiles.
+
+### 5. No Data = No Claim — Never Hallucinate
+If a data point cannot be sourced from a scraped page, search result, or tool response, do NOT infer, estimate, or fill it in. Write `[NOT FOUND]` or `[DATA UNAVAILABLE]` instead. This applies to:
+- Pricing not shown on their site
+- Regulatory details not confirmed
+- Traffic/SEO metrics not returned by tools
+- Feature claims not found on scraped pages
+- Review ratings with no confirmed source
+
+A profile with honest gaps is more valuable than a complete-looking profile with fabricated data. The user will make real business decisions from these profiles — wrong data is worse than missing data.
+
+**Labeling conventions:**
+- `[NOT FOUND]` — looked for it, couldn't find it
+- `[DATA UNAVAILABLE]` — tool didn't return data or page blocked
+- `[INFERRED]` — reasonable inference from available evidence, clearly labeled as such, not stated as fact
+- `[UNCONFIRMED]` — found a claim but couldn't verify it from a primary source
 
 ---
 
@@ -53,7 +128,6 @@ competitor-profiles/
 │   └── <competitor-slug>/
 │       └── <YYYY-MM-DD>/
 │           ├── scrapes/    # one .md file per scraped page (homepage.md, pricing.md, ...)
-│           ├── seo/        # one .json file per DataForSEO call (backlinks-summary.json, ranked-keywords.json, ...)
 │           └── reviews/    # one .md or .json file per review source (g2.md, capterra.md, ...)
 ├── <competitor-slug>.md    # final synthesized profile
 └── _summary.md             # cross-competitor summary
@@ -64,7 +138,6 @@ Rules:
 - `<competitor-slug>` is lowercase, hyphenated (e.g. `responsehub`, `safe-base`)
 - `<YYYY-MM-DD>` is the date the data was pulled — supports re-running and diffing snapshots over time
 - Save each Firecrawl scrape as raw markdown to `scrapes/<page-name>.md`
-- Save each DataForSEO response as raw JSON to `seo/<endpoint-name>.json`
 - Save each review source to `reviews/<source>.md` (cleaned text) or `.json` (raw)
 - Always create the date folder fresh on a new run; never overwrite a prior date's data
 
@@ -78,33 +151,73 @@ The synthesized profile (`<competitor-slug>.md`) should reference the raw data f
 
 For each competitor URL, scrape key pages to extract positioning, features, pricing, and messaging.
 
-#### Step 1: Map the site
+#### Firecrawl: MCP vs REST API
 
-Use **Firecrawl Map** to discover the competitor's site structure and identify key pages:
+Two ways to call Firecrawl — prefer whichever is available:
 
+**Option A — MCP tools** (when `mcp__firecrawl__*` tools are loaded in session):
 ```
-firecrawl_map → competitor URL
+mcp__firecrawl__firecrawl_map → competitor URL
+mcp__firecrawl__firecrawl_scrape → each key page URL
 ```
 
-From the map, identify and prioritize these page types:
+**Option B — REST API via Bash** (confirmed working; use when MCP tools aren't available):
+```bash
+# Map
+curl -s -X POST https://api.firecrawl.dev/v1/map \
+  -H "Authorization: Bearer $FIRECRAWL_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"url":"https://example.com","limit":50}'
+
+# Scrape
+curl -s -X POST https://api.firecrawl.dev/v1/scrape \
+  -H "Authorization: Bearer $FIRECRAWL_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"url":"https://example.com/page","formats":["markdown"]}'
+```
+
+The API key is stored in `C:/Users/esfan/.claude/settings.json` under `mcpServers.firecrawl.env.FIRECRAWL_API_KEY`. Run multiple scrapes in parallel using Bash background jobs (`&` + `wait`).
+
+**MCP map note**: The Firecrawl map endpoint often returns only blog/article URLs, not main nav pages. Always follow up by scraping the homepage and extracting its `links` to discover account, pricing, regulation, and feature pages.
+
+#### Step 1: Discover site structure
+
+Map the site, then scrape the homepage with `"formats":["links"]` to extract internal navigation links. From these, identify:
 - Homepage
-- Pricing page
-- Features / product pages
+- Account / pricing pages (each account type may have its own page)
+- Regulation / legal page
+- Deposit & withdrawal page
+- Bonus / promotions page (try `/bonus`, `/promotions`, `/offers`)
 - About / company page
-- Blog (top-level, for content strategy signals)
-- Customers / case studies page
-- Integrations page
-- Changelog / what's new (if exists)
+- Social / copy trading page
+- Blog (top-level only — for content strategy signals)
 
-#### Step 2: Scrape key pages
+#### Step 2: Scrape key pages in parallel
 
-Use **Firecrawl Scrape** on each identified page:
+Scrape all identified pages simultaneously (Bash background jobs or parallel MCP calls). Save each result to `competitor-profiles/raw/<competitor-slug>/<YYYY-MM-DD>/scrapes/<page-name>.md` before extracting fields.
 
+**For forex brokers — always scrape these specifically:**
+- Each account type page separately (they often have different specs)
+- Regulation page (confirm regulator names and license numbers directly)
+- Deposit/withdrawal page (confirm payment methods, fees, and limits)
+- Bonus/promotions page — if 404, document as confirmed absent
+
+**After scraping — strip JSON wrappers:** The REST API returns `{"success":true,"data":{"markdown":"..."}}`. Always extract the markdown and overwrite the file with clean content:
+```python
+import json, os
+for fname in os.listdir(scrapes_dir):
+    path = os.path.join(scrapes_dir, fname)
+    with open(path, encoding='utf-8', errors='replace') as f:
+        content = f.read()
+    try:
+        data = json.loads(content)
+        md = data.get('data', {}).get('markdown', '')
+        if md:
+            with open(path, 'w', encoding='utf-8') as f:
+                f.write(md)
+    except json.JSONDecodeError:
+        pass  # already clean
 ```
-firecrawl_scrape → each key page URL
-```
-
-Save each result to `competitor-profiles/raw/<competitor-slug>/<YYYY-MM-DD>/scrapes/<page-name>.md` before extracting fields.
 
 Extract from each page:
 
@@ -130,53 +243,9 @@ Save each scraped review page to `competitor-profiles/raw/<competitor-slug>/<YYY
 
 ---
 
-### Phase 2: SEO & Market Data (DataForSEO)
+### Phase 2: Synthesis
 
-Use DataForSEO MCP tools to gather quantitative competitive intelligence. Save each raw response as JSON to `competitor-profiles/raw/<competitor-slug>/<YYYY-MM-DD>/seo/<endpoint-name>.json` before parsing it into the profile. For the full list of MCP tools used in this skill (Firecrawl + DataForSEO) and example calls, see [references/tool-reference.md](references/tool-reference.md).
-
-#### Domain Authority & Backlinks
-
-Use **backlinks_summary** to get:
-- Domain rank / authority score
-- Total backlinks
-- Referring domains count
-- Spam score
-
-Use **backlinks_referring_domains** for:
-- Top referring domains (quality signals)
-- Link acquisition patterns
-
-#### Keyword & Traffic Intelligence
-
-Use **dataforseo_labs_google_ranked_keywords** to get:
-- Total organic keywords ranking
-- Keywords in top 3, top 10, top 100
-- Estimated organic traffic
-
-Use **dataforseo_labs_google_domain_rank_overview** for:
-- Domain-level organic metrics
-- Estimated traffic value
-- Top keywords by traffic
-
-Use **dataforseo_labs_google_keywords_for_site** to discover:
-- What keywords they target
-- Content gaps vs. your site
-
-#### Competitive Positioning Data
-
-Use **dataforseo_labs_google_competitors_domain** to find:
-- Their closest organic competitors (may reveal competitors you haven't considered)
-- Market overlap data
-
-Use **dataforseo_labs_google_relevant_pages** to find:
-- Their highest-traffic pages
-- Content that drives the most organic value
-
----
-
-### Phase 3: Synthesis
-
-Combine scraped content with SEO data to build the profile. Cross-reference claims (e.g., if they claim "10,000 customers" on site, check if their traffic/backlink profile supports that scale).
+Combine scraped content and review data to build the profile. Cross-reference claims (e.g., if they claim "10,000 customers" on site, check if their review volume and social proof support that scale).
 
 ---
 
@@ -210,10 +279,6 @@ Each profile follows this structure:
 | Headquarters | [location] |
 | Team size | [estimate] |
 | Funding | [if known] |
-| Domain rank | [from DataForSEO] |
-| Est. organic traffic | [monthly] |
-| Referring domains | [count] |
-| Organic keywords | [count] |
 
 ---
 
@@ -276,27 +341,12 @@ Each profile follows this structure:
 
 ---
 
-## SEO & Content Strategy
+## Content Strategy
 
-**Organic strength**:
-- Estimated monthly organic traffic: [number]
-- Organic keywords (top 10): [count]
-- Organic traffic value: $[estimated]
-
-**Top organic pages** (by estimated traffic):
-1. [page URL] — [keyword] — [est. traffic]
-2. [page URL] — [keyword] — [est. traffic]
-3. [page URL] — [keyword] — [est. traffic]
-
-**Content strategy signals**:
-- Blog post frequency: [estimate]
+**Content signals** (from scraped site):
+- Blog post frequency: [estimate from scraped blog]
 - Primary content types: [guides, comparisons, templates, etc.]
 - Content focus areas: [topics they invest in]
-
-**Backlink profile**:
-- Referring domains: [count]
-- Top referring sites: [list 5]
-- Link acquisition pattern: [growing/stable/declining]
 
 ---
 
@@ -330,7 +380,6 @@ Each profile follows this structure:
 
 - Homepage scraped: [date]
 - Pricing page scraped: [date]
-- SEO data pulled: [date]
 - Review data pulled: [date, sources]
 ```
 
@@ -352,13 +401,11 @@ After profiling all competitors, generate a `competitor-profiles/_summary.md` th
 
 ### Quick Scan (faster, lower cost)
 - Scrape: homepage + pricing page only
-- SEO: domain rank overview + ranked keywords summary
-- Skip: reviews, technology stack, backlink details
-- Output: abbreviated profile (At a Glance + Positioning + Pricing + SEO summary)
+- Skip: reviews, technology stack
+- Output: abbreviated profile (At a Glance + Positioning + Pricing)
 
 ### Deep Profile (comprehensive)
 - Scrape: all key pages + review sites
-- SEO: full backlink analysis + keyword intelligence + competitor discovery
 - Include: technology stack, content strategy analysis, review mining
 - Output: full profile template
 
@@ -371,9 +418,9 @@ Default to **quick scan** unless the user requests deep profiling or specifies a
 When profiling more than one competitor:
 
 1. **Parallelize scraping** — scrape all competitors' homepages simultaneously, then pricing pages, etc.
-2. **Use consistent metrics** — pull the same DataForSEO metrics for every competitor so profiles are comparable
+2. **Use consistent fields** — extract the same dimensions for every competitor so profiles are comparable
 3. **Build the summary last** — after all individual profiles are complete
-4. **Prioritize by relevance** — if the user has 10+ competitors, suggest profiling the top 5 first based on domain overlap or market similarity
+4. **Prioritize by relevance** — if the user has 10+ competitors, suggest profiling the top 5 first based on market similarity
 
 ---
 
@@ -382,8 +429,8 @@ When profiling more than one competitor:
 Profiles are snapshots. When updating:
 
 - Check pricing pages first (most volatile)
-- Re-pull SEO metrics (traffic and rankings shift monthly)
 - Scan changelog for product changes
+- Re-scrape homepage for messaging shifts
 - Update the "Generated" date
 - Note what changed since last profile in a `## Change Log` section at the bottom
 
